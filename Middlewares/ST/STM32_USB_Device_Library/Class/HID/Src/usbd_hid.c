@@ -48,6 +48,7 @@ EndBSPDependencies */
 #include "usbd_ctlreq.h"
 
 
+
 /** @addtogroup STM32_USB_DEVICE_LIBRARY
   * @{
   */
@@ -108,6 +109,8 @@ static uint8_t  *USBD_HID_GetOtherSpeedCfgDesc(uint16_t *length);
 static uint8_t  *USBD_HID_GetDeviceQualifierDesc(uint16_t *length);
 
 static uint8_t  USBD_HID_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum);
+
+#define HID_EPIN_SIZE 8
 /**
   * @}
   */
@@ -367,42 +370,54 @@ __ALIGN_BEGIN static uint8_t USBD_HID_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_
 
 __ALIGN_BEGIN static uint8_t HID_MOUSE_ReportDesc[] __ALIGN_END =
 {
+  /* -------- Application Collection -------- */
   0x05, 0x01,        // Usage Page (Generic Desktop)
   0x09, 0x05,        // Usage (Game Pad)
   0xA1, 0x01,        // Collection (Application)
-  0x09, 0x01,        //   Usage (Pointer)
-  0xA1, 0x00,        //   Collection (Physical)
 
-  /* Buttons */
-  0x05, 0x09,        // Usage Page (Button)
-  0x19, 0x01,        // Usage Minimum (Button 1)
-  0x29, 0x0F,        // Usage Maximum (Button 15)
-  0x15, 0x00,        // Logical Minimum (0)
-  0x25, 0x01,        // Logical Maximum (1)
-  0x75, 0x01,        // Report Size (1)
-  0x95, 0x0F,        // Report Count (15)
-  0x81, 0x02,        // Input (Data,Var,Abs)
+    /* -------- Buttons (15) -------- */
+    0x05, 0x09,      // Usage Page (Button)
+    0x19, 0x01,      // Usage Minimum (Button 1)
+    0x29, 0x0F,      // Usage Maximum (Button 15)
+    0x15, 0x00,      // Logical Minimum (0)
+    0x25, 0x01,      // Logical Maximum (1)
+    0x75, 0x01,      // Report Size (1)
+    0x95, 0x0F,      // Report Count (15)
+    0x81, 0x02,      // Input (Data,Var,Abs)
 
-  /* Padding to next byte */
-  0x75, 0x01,
-  0x95, 0x01,
-  0x81, 0x03,        // Input (Const,Var,Abs)
+    /* Padding to next byte */
+    0x75, 0x01,
+    0x95, 0x01,
+    0x81, 0x03,      // Input (Const)
 
-  /* Axes */
-  0x05, 0x01,        // Usage Page (Generic Desktop)
-  0x15, 0x81,        // Logical Minimum (-127)
-  0x25, 0x7F,        // Logical Maximum (127)
-  0x75, 0x08,        // Report Size (8)
-  0x95, 0x06,        // Report Count (6)
-  0x09, 0x30,        // Usage (X)
-  0x09, 0x31,        // Usage (Y)
-  0x09, 0x32,        // Usage (Z)
-  0x09, 0x33,        // Usage (Rx)
-  0x09, 0x34,        // Usage (Ry)
-  0x09, 0x35,        // Usage (Rz)
-  0x81, 0x02,        // Input (Data,Var,Abs)
+    /* -------- D-Pad (Hat Switch) -------- */
+    0x05, 0x01,      // Usage Page (Generic Desktop)
+    0x09, 0x39,      // Usage (Hat switch)
+    0x15, 0x01,      // Logical Min (1)
+    0x25, 0x08,      // Logical Max (8)
+    0x35, 0x00,      // Physical Min (0)
+    0x46, 0x3B, 0x01,// Physical Max (315)
+    0x65, 0x14,      // Unit (Degrees)
+    0x75, 0x04,      // Report Size (4)
+    0x95, 0x01,      // Report Count (1)
+    0x81, 0x02,      // Input (Data,Var,Abs)
 
-  0xC0,              // End Physical Collection
+    /* Hat padding */
+    0x75, 0x04,
+    0x95, 0x01,
+    0x81, 0x03,      // Input (Const)
+
+    /* -------- Axes (X, Y, Rx, Ry) -------- */
+    0x15, 0x81,      // Logical Min (-127)
+    0x25, 0x7F,      // Logical Max (127)
+    0x75, 0x08,      // Report Size (8)
+    0x95, 0x04,      // Report Count (4)
+    0x09, 0x30,      // Usage (X)
+    0x09, 0x31,      // Usage (Y)
+    0x09, 0x33,      // Usage (Rx)
+    0x09, 0x34,      // Usage (Ry)
+    0x81, 0x02,      // Input (Data,Var,Abs)
+
   0xC0               // End Application Collection
 };
 #define HID_MOUSE_REPORT_DESC_SIZE sizeof(HID_MOUSE_ReportDesc)

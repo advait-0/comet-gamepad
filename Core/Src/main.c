@@ -29,16 +29,18 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
-typedef struct {
-
-    uint16_t buttons;
-    int16_t  x;
-    int16_t  y;
-    int16_t  z;
-    int16_t  rx;
-    int16_t  ry;
-    int16_t  rz;
+typedef struct __attribute__((packed)) {
+    uint16_t buttons;  // 2
+    uint8_t  hat;      // 1
+    int8_t   x;        // 1
+    int8_t   y;        // 1
+    int8_t   rx;       // 1
+    int8_t   ry;       // 1
 } joystickReport;
+
+_Static_assert(sizeof(joystickReport) == 7,
+               "HID report size mismatch");
+
 
 
 /* USER CODE END PTD */
@@ -176,26 +178,39 @@ int main(void)
           (button_B4 << 1) |	//east //up
           (button_B3);			//south
 
-      /* -------- D-Pad as HAT (ABS_HAT0X / ABS_HAT0Y) -------- */
+      /* -------- D-Pad as HAT (HID Hat Switch) -------- */
 
-      int8_t hat_x = 0;
-      int8_t hat_y = 0;
+      uint8_t hat = 0;
 
-      /* Horizontal */
-      if (button_A3) hat_x = -1;   // Left
-      if (button_A4) hat_x =  1;   // Right
+      /*
+       Hat values (HID standard):
+       0 = Center
+       1 = Up
+       2 = Up-Right
+       3 = Right
+       4 = Down-Right
+       5 = Down
+       6 = Down-Left
+       7 = Left
+       8 = Up-Left
+      */
 
-      /* Vertical */
-      if (button_A1) hat_y = -1;   // Up
-      if (button_A2) hat_y =  1;   // Down
+      if (button_A1 && !button_A3 && !button_A4)        hat = 1; // Up
+      else if (button_A1 && button_A4)                  hat = 2; // Up-Right
+      else if (button_A4 && !button_A1 && !button_A2)   hat = 3; // Right
+      else if (button_A2 && button_A4)                  hat = 4; // Down-Right
+      else if (button_A2 && !button_A3 && !button_A4)   hat = 5; // Down
+      else if (button_A2 && button_A3)                  hat = 6; // Down-Left
+      else if (button_A3 && !button_A1 && !button_A2)   hat = 7; // Left
+      else if (button_A1 && button_A3)                  hat = 8; // Up-Left
 
+      joystickReportContainer.hat = hat;
 
-      joystickReportContainer.x  = hat_x;   // ABS_HAT0X
-      joystickReportContainer.y  = hat_y;   // ABS_HAT0Y
-      joystickReportContainer.z  = 0;
+      /* Leave joystick axes untouched */
+      joystickReportContainer.x  = 0;
+      joystickReportContainer.y  = 0;
       joystickReportContainer.rx = 0;
       joystickReportContainer.ry = 0;
-      joystickReportContainer.rz = 0;
 
 
 
