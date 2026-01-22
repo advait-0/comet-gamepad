@@ -167,22 +167,36 @@ int main(void)
           ((uint16_t)button_S1 << 10) |
           ((uint16_t)button_S2 << 9)  |
           ((uint16_t)button_S3 << 8)  |
-          (button_A1 << 7) |
-          (button_A2 << 6) |
-          (button_A3 << 5) |
-          (button_A4 << 4) |
-          (button_B1 << 3) |
-          (button_B2 << 2) |
-          (button_B3 << 1) |
-          (button_B4);
+//          (button_A1 << 7) |
+//          (button_A2 << 6) |
+//          (button_A3 << 5) |
+          (button_B2 << 4) |
+          (button_B1 << 3) |	//north
+//          (button_A4 << 2) |	//west
+          (button_B4 << 1) |	//east //up
+          (button_B3);			//south
+
+      /* -------- D-Pad as HAT (ABS_HAT0X / ABS_HAT0Y) -------- */
+
+      int8_t hat_x = 0;
+      int8_t hat_y = 0;
+
+      /* Horizontal */
+      if (button_A3) hat_x = -1;   // Left
+      if (button_A4) hat_x =  1;   // Right
+
+      /* Vertical */
+      if (button_A1) hat_y = -1;   // Up
+      if (button_A2) hat_y =  1;   // Down
 
 
-      joystickReportContainer.x  = 0;
-      joystickReportContainer.y  = 0;
+      joystickReportContainer.x  = hat_x;   // ABS_HAT0X
+      joystickReportContainer.y  = hat_y;   // ABS_HAT0Y
       joystickReportContainer.z  = 0;
       joystickReportContainer.rx = 0;
       joystickReportContainer.ry = 0;
       joystickReportContainer.rz = 0;
+
 
 
 //      USBD_HID_SendReport(&hUsbDeviceFS, (uint8_t *) &joystickReportContainer, 7);
