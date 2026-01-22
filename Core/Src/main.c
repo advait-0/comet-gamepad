@@ -164,53 +164,67 @@ int main(void)
       joystickReportContainer.buttons =
           ((uint16_t)button_M1 << 14) |
           ((uint16_t)button_M2 << 13) |
-          ((uint16_t)button_M3 << 12) |
-          ((uint16_t)button_M4 << 11) |
-          ((uint16_t)button_S1 << 10) |
-          ((uint16_t)button_S2 << 9)  |
-          ((uint16_t)button_S3 << 8)  |
+          ((uint16_t)button_S3 << 12) |
+          ((uint16_t)button_S1 << 11) |
+          ((uint16_t)button_S2 << 10) |
+          ((uint16_t)button_M4 << 9)  |
+          ((uint16_t)button_M3 << 8)  |
 //          (button_A1 << 7) |
 //          (button_A2 << 6) |
 //          (button_A3 << 5) |
-          (button_B2 << 4) |
-          (button_B1 << 3) |	//north
-//          (button_A4 << 2) |	//west
-          (button_B4 << 1) |	//east //up
-          (button_B3);			//south
+          (button_B1 << 4) |
+          (button_B2 << 3) |
+//          (button_A4 << 2) |
+          (button_B4 << 1) |
+          (button_B3);
 
-      /* -------- D-Pad as HAT (HID Hat Switch) -------- */
+      /* -------- D-Pad as HAT + Left Stick mirror (FIXED) -------- */
 
       uint8_t hat = 0;
+      int8_t  lx  = 0;
+      int8_t  ly  = 0;
 
       /*
-       Hat values (HID standard):
-       0 = Center
-       1 = Up
-       2 = Up-Right
-       3 = Right
-       4 = Down-Right
-       5 = Down
-       6 = Down-Left
-       7 = Left
-       8 = Up-Left
+       Physical buttons:
+       A1 = UP
+       A2 = LEFT
+       A3 = DOWN
+       A4 = RIGHT
       */
 
-      if (button_A1 && !button_A3 && !button_A4)        hat = 1; // Up
+      /* -------- HAT calculation (A2 ↔ A3 fixed) -------- */
+      if (button_A1 && !button_A2 && !button_A4)        hat = 1; // Up
       else if (button_A1 && button_A4)                  hat = 2; // Up-Right
-      else if (button_A4 && !button_A1 && !button_A2)   hat = 3; // Right
-      else if (button_A2 && button_A4)                  hat = 4; // Down-Right
-      else if (button_A2 && !button_A3 && !button_A4)   hat = 5; // Down
-      else if (button_A2 && button_A3)                  hat = 6; // Down-Left
-      else if (button_A3 && !button_A1 && !button_A2)   hat = 7; // Left
-      else if (button_A1 && button_A3)                  hat = 8; // Up-Left
+      else if (button_A4 && !button_A1 && !button_A3)   hat = 3; // Right
+      else if (button_A3 && button_A4)                  hat = 4; // Down-Right
+      else if (button_A3 && !button_A2 && !button_A4)   hat = 5; // Down
+      else if (button_A3 && button_A2)                  hat = 6; // Down-Left
+      else if (button_A2 && !button_A1 && !button_A3)   hat = 7; // Left
+      else if (button_A1 && button_A2)                  hat = 8; // Up-Left
+      else                                               hat = 0; // Center                                             hat = 0;
 
       joystickReportContainer.hat = hat;
 
-      /* Leave joystick axes untouched */
-      joystickReportContainer.x  = 0;
-      joystickReportContainer.y  = 0;
+      /* -------- LEFT STICK MIRROR (FIXED AXES) -------- */
+      switch (hat) {
+          case 1:  lx =  0;   ly = -127; break;           // Up
+          case 2:  lx =  127; ly = -127; break;           // Up-Right
+          case 3:  lx =  127; ly =  0;    break;           // Right
+          case 4:  lx =  127; ly =  127; break;            // Down-Right
+          case 5:  lx =  0;   ly =  127; break;            // Down
+          case 6:  lx = -127; ly =  127; break;            // Down-Left
+          case 7:  lx = -127; ly =  0;    break;            // Left
+          case 8:  lx = -127; ly = -127; break;            // Up-Left
+          default: break;
+      }
+
+      /* ✔ Correct axis assignment */
+      joystickReportContainer.x  = lx;   // LEFT / RIGHT
+      joystickReportContainer.y  = ly;   // UP / DOWN
       joystickReportContainer.rx = 0;
       joystickReportContainer.ry = 0;
+
+
 
 
 
