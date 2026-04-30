@@ -1,7 +1,7 @@
 # Gamepad Extension for the Mecha Comet
 
 ## Pin out configuration for the STM32
-![alt text](image.png)
+![alt text](Assets/image.png)
 
 ## St-Cube IDE Setup
 - Clone this repo
