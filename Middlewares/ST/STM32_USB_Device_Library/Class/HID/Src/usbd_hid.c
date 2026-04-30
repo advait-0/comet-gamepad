@@ -48,7 +48,6 @@ EndBSPDependencies */
 #include "usbd_ctlreq.h"
 
 
-
 /** @addtogroup STM32_USB_DEVICE_LIBRARY
   * @{
   */
@@ -109,8 +108,6 @@ static uint8_t  *USBD_HID_GetOtherSpeedCfgDesc(uint16_t *length);
 static uint8_t  *USBD_HID_GetDeviceQualifierDesc(uint16_t *length);
 
 static uint8_t  USBD_HID_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum);
-
-#define HID_EPIN_SIZE 8
 /**
   * @}
   */
@@ -160,8 +157,8 @@ __ALIGN_BEGIN static uint8_t USBD_HID_CfgFSDesc[USB_HID_CONFIG_DESC_SIZ]  __ALIG
   0x00,         /*bAlternateSetting: Alternate setting*/
   0x01,         /*bNumEndpoints*/
   0x03,         /*bInterfaceClass: HID*/
-  0x00,         /*bInterfaceSubClass : 1=BOOT, 0=no boot*/
-  0x00,         /*nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse*/
+  0x01,         /*bInterfaceSubClass : 1=BOOT, 0=no boot*/
+  0x02,         /*nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse*/
   0,            /*iInterface: Index of string descriptor*/
   /******************** Descriptor of Joystick Mouse HID ********************/
   /* 18 */
@@ -318,150 +315,55 @@ __ALIGN_BEGIN static uint8_t USBD_HID_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_
   0x00,
 };
 
-//__ALIGN_BEGIN static uint8_t HID_MOUSE_ReportDesc[HID_MOUSE_REPORT_DESC_SIZE]  __ALIGN_END =
-//{
-//  0x05,   0x01,
-//  0x09,   0x02,
-//  0xA1,   0x01,
-//  0x09,   0x01,
-//
-//  0xA1,   0x00,
-//  0x05,   0x09,
-//  0x19,   0x01,
-//  0x29,   0x03,
-//
-//  0x15,   0x00,
-//  0x25,   0x01,
-//  0x95,   0x03,
-//  0x75,   0x01,
-//
-//  0x81,   0x02,
-//  0x95,   0x01,
-//  0x75,   0x05,
-//  0x81,   0x01,
-//
-//  0x05,   0x01,
-//  0x09,   0x30,
-//  0x09,   0x31,
-//  0x09,   0x38,
-//
-//  0x15,   0x81,
-//  0x25,   0x7F,
-//  0x75,   0x08,
-//  0x95,   0x03,
-//
-//  0x81,   0x06,
-//  0xC0,   0x09,
-//  0x3c,   0x05,
-//  0xff,   0x09,
-//
-//  0x01,   0x15,
-//  0x00,   0x25,
-//  0x01,   0x75,
-//  0x01,   0x95,
-//
-//  0x02,   0xb1,
-//  0x22,   0x75,
-//  0x06,   0x95,
-//  0x01,   0xb1,
-//
-//  0x01,   0xc0
-//};
-
-__ALIGN_BEGIN static uint8_t HID_MOUSE_ReportDesc[] __ALIGN_END =
+__ALIGN_BEGIN static uint8_t HID_MOUSE_ReportDesc[HID_MOUSE_REPORT_DESC_SIZE]  __ALIGN_END =
 {
-  /* -------- Application Collection -------- */
-  0x05, 0x01,        // Usage Page (Generic Desktop)
-  0x09, 0x05,        // Usage (Game Pad)
-  0xA1, 0x01,        // Collection (Application)
+  0x05,   0x01,
+  0x09,   0x02,
+  0xA1,   0x01,
+  0x09,   0x01,
 
-    /* -------- Buttons (15) -------- */
-    0x05, 0x09,      // Usage Page (Button)
-    0x19, 0x01,      // Usage Minimum (Button 1)
-    0x29, 0x0F,      // Usage Maximum (Button 15)
-    0x15, 0x00,      // Logical Minimum (0)
-    0x25, 0x01,      // Logical Maximum (1)
-    0x75, 0x01,      // Report Size (1)
-    0x95, 0x0F,      // Report Count (15)
-    0x81, 0x02,      // Input (Data,Var,Abs)
+  0xA1,   0x00,
+  0x05,   0x09,
+  0x19,   0x01,
+  0x29,   0x03,
 
-    /* Padding to next byte */
-    0x75, 0x01,
-    0x95, 0x01,
-    0x81, 0x03,      // Input (Const)
+  0x15,   0x00,
+  0x25,   0x01,
+  0x95,   0x03,
+  0x75,   0x01,
 
-    /* -------- D-Pad (Hat Switch) -------- */
-    0x05, 0x01,      // Usage Page (Generic Desktop)
-    0x09, 0x39,      // Usage (Hat switch)
-    0x15, 0x01,      // Logical Min (1)
-    0x25, 0x08,      // Logical Max (8)
-    0x35, 0x00,      // Physical Min (0)
-    0x46, 0x3B, 0x01,// Physical Max (315)
-    0x65, 0x14,      // Unit (Degrees)
-    0x75, 0x04,      // Report Size (4)
-    0x95, 0x01,      // Report Count (1)
-    0x81, 0x02,      // Input (Data,Var,Abs)
+  0x81,   0x02,
+  0x95,   0x01,
+  0x75,   0x05,
+  0x81,   0x01,
 
-    /* Hat padding */
-    0x75, 0x04,
-    0x95, 0x01,
-    0x81, 0x03,      // Input (Const)
+  0x05,   0x01,
+  0x09,   0x30,
+  0x09,   0x31,
+  0x09,   0x38,
 
-    /* -------- Axes (X, Y, Rx, Ry) -------- */
-    0x15, 0x81,      // Logical Min (-127)
-    0x25, 0x7F,      // Logical Max (127)
-    0x75, 0x08,      // Report Size (8)
-    0x95, 0x04,      // Report Count (4)
-    0x09, 0x30,      // Usage (X)
-    0x09, 0x31,      // Usage (Y)
-    0x09, 0x33,      // Usage (Rx)
-    0x09, 0x34,      // Usage (Ry)
-    0x81, 0x02,      // Input (Data,Var,Abs)
+  0x15,   0x81,
+  0x25,   0x7F,
+  0x75,   0x08,
+  0x95,   0x03,
 
-  0xC0               // End Application Collection
+  0x81,   0x06,
+  0xC0,   0x09,
+  0x3c,   0x05,
+  0xff,   0x09,
+
+  0x01,   0x15,
+  0x00,   0x25,
+  0x01,   0x75,
+  0x01,   0x95,
+
+  0x02,   0xb1,
+  0x22,   0x75,
+  0x06,   0x95,
+  0x01,   0xb1,
+
+  0x01,   0xc0
 };
-#define HID_MOUSE_REPORT_DESC_SIZE sizeof(HID_MOUSE_ReportDesc)
-
-
-//__ALIGN_BEGIN static uint8_t HID_MOUSE_ReportDesc[HID_MOUSE_REPORT_DESC_SIZE] __ALIGN_END = {
-//  0x05, 0x01,        /* Usage Page (Generic Desktop Ctrls) */
-//  0x09, 0x04,        /* Usage (Joystick) */
-//  0xA1, 0x01,        /* Collection (Application) */
-//
-//  0x05, 0x09,        /*   Usage Page (Button) */
-//  0x19, 0x01,        /*   Usage Minimum (1) */
-//  0x29, 0x08,        /*   Usage Maximum (8) */
-//  0x15, 0x00,        /*   Logical Minimum (0) */
-//  0x25, 0x01,        /*   Logical Maximum (1) */
-//  0x95, 0x08,        /*   Report Count (8) -> 8 buttons */
-//  0x75, 0x01,        /*   Report Size (1)  -> 1 bit each */
-//  0x81, 0x02,        /*   Input (Data,Var,Abs) */
-//
-//  0xC0               /* End Collection */
-//};
-
-
-//__ALIGN_BEGIN static uint8_t HID_MOUSE_ReportDesc[HID_MOUSE_REPORT_DESC_SIZE] __ALIGN_END =
-//{
-//  0x05, 0x01,        // Usage Page (Generic Desktop)
-//  0x09, 0x05,        // Usage (Game Pad)
-//  0xA1, 0x01,        // Collection (Application)
-//
-//  0x05, 0x09,        //   Usage Page (Button)
-//  0x19, 0x01,        //   Usage Minimum (Button 1)
-//  0x29, 0x0F,        //   Usage Maximum (Button 15)
-//  0x15, 0x00,        //   Logical Minimum (0)
-//  0x25, 0x01,        //   Logical Maximum (1)
-//  0x95, 0x0F,        //   Report Count (15 buttons)
-//  0x75, 0x01,        //   Report Size (1 bit per button)
-//  0x81, 0x02,        //   Input (Data, Variable, Absolute)
-//
-//  0x95, 0x01,        //   Report Count (1 padding bit)
-//  0x75, 0x01,        //   Report Size (1 bit)
-//  0x81, 0x03,        //   Input (Constant, Variable, Absolute) -> padding
-//
-//  0xC0               // End Collection
-//};
 
 /**
   * @}
